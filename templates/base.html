@@ -1,12 +1,21 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block meta %}{% endblock %}</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  {% load static %}
+
+  <!-- DOMPurify for XSS Protection -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="{% static 'css/global.css' %}" />
 </head>
+
 <body class="font-sans bg-gradient-to-br from-black via-slate-900 to-red-900 min-h-screen">
 
   <!-- NAVBAR -->
@@ -15,14 +24,13 @@
       
       <!-- Brand -->
       <a href="{% url 'main:show_main' %}" class="font-bold text-lg tracking-wide">
-        Football Shop
+        Sportify
       </a>
       
       <!-- Desktop Menu -->
       <div class="hidden md:flex space-x-6 text-sm font-medium">
         <a href="{% url 'main:show_main' %}" class="hover:text-blue-400 transition">Home</a>
         {% if user.is_authenticated %}
-          <a href="{% url 'main:create_product' %}" class="hover:text-blue-400 transition">Tambah Produk</a>
           <a href="{% url 'main:logout' %}" class="hover:text-red-400 transition">Logout</a>
         {% else %}
           <a href="{% url 'main:login' %}" class="hover:text-blue-400 transition">Login</a>
@@ -30,17 +38,14 @@
         {% endif %}
       </div>
 
-      <!-- Mobile Button -->
-      <button id="menu-btn" class="md:hidden text-white focus:outline-none">
-        ☰
-      </button>
+      <!-- Mobile Menu Button -->
+      <button id="menu-btn" class="md:hidden text-white focus:outline-none text-xl">☰</button>
     </div>
 
-    <!-- Mobile Menu -->
+    <!-- Mobile Dropdown Menu -->
     <div id="menu" class="hidden md:hidden px-6 pb-4 bg-gray-900/70 backdrop-blur border-t border-white/10 text-white space-y-3 text-sm">
       <a href="{% url 'main:show_main' %}" class="block hover:text-blue-400 transition">Home</a>
       {% if user.is_authenticated %}
-        <a href="{% url 'main:create_product' %}" class="block hover:text-blue-400 transition">Tambah Produk</a>
         <a href="{% url 'main:logout' %}" class="block hover:text-red-400 transition">Logout</a>
       {% else %}
         <a href="{% url 'main:login' %}" class="block hover:text-blue-400 transition">Login</a>
@@ -56,14 +61,19 @@
 
   <!-- FOOTER -->
   <footer class="mt-20 py-6 text-center text-sm text-gray-400 border-t border-white/10 bg-gray-900/40 backdrop-blur">
-    © 2025 Football Shop. All rights reserved.
+    © 2025 Sportify. All rights reserved.
   </footer>
 
-  <!-- SCRIPT -->
+  <!-- SCRIPT: Mobile Navbar Toggle -->
   <script>
     document.getElementById("menu-btn").addEventListener("click", () => {
       document.getElementById("menu").classList.toggle("hidden");
     });
   </script>
+
+  <!-- GLOBAL COMPONENTS -->
+  {% include 'toast.html' %}
+  {% include 'modal.html' %}
+
 </body>
 </html>
