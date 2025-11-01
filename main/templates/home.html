@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Sportify - Products</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-900 via-black to-red-900 text-white pt-20">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl sm:text-5xl font-extrabold drop-shadow-lg">Sportify Store</h1>
+      <p class="mt-3 text-gray-300">
+        Temukan perlengkapan olahraga terbaik untuk performa maksimal Anda.
+      </p>
+    </div>
+
+    <!-- Tombol Create Modal -->
+    {% if user.is_authenticated %}
+    <div class="text-center mb-8">
+      <button onclick="showModal()"
+        class="inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/30 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Tambah Produk via AJAX
+      </button>
+    </div>
+    {% endif %}
+
+    <!-- Filter Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-4">
+      <div class="flex space-x-3 mb-4 sm:mb-0">
+        <a id="filter-all"
+          class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-700">
+          Semua Produk
+        </a>
+        <a id="filter-my"
+          class="bg-white/10 text-gray-300 border border-white/20 px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-600 hover:text-white">
+          Produk Saya
+        </a>
+      </div>
+      {% if user.is_authenticated %}
+      <div class="text-sm text-gray-400">Last login: {{ last_login }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="bg-white/10 rounded-xl border border-white/20 p-12 text-center hidden">
+      <svg class="animate-spin h-8 w-8 text-blue-400 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+          stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <p class="text-gray-300 mt-3">Memuat produk...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden text-center text-red-400 font-semibold">
+      Gagal memuat produk. Coba lagi nanti 😢
+    </div>
+
+    <!-- Tombol Refresh Produk -->
+    <div class="text-right mb-6">
+      <button onclick="fetchProducts()" 
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition">
+        Refresh Produk
+      </button>
+    </div>
+    <!-- Product Grid -->
+    <div id="grid" class="hidden"></div>
+
+    <!-- Empty State -->
+    <div id="empty" class="bg-white/10 rounded-xl border border-white/20 p-12 text-center hidden">
+      <div class="w-32 h-32 mx-auto mb-4 opacity-80">
+        <img src="{% static 'image/no-product.png' %}" alt="No product available"
+          class="w-full h-full object-contain">
+      </div>
+      <h3 class="text-lg font-medium text-white mb-2">Belum ada produk</h3>
+      <p class="text-gray-400 mb-6">Ayo tambahkan produk pertamamu di Sportify!</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Include Modal -->
+{% include 'modal.html' %}
+
+<!-- ============================= -->
+<!--    INLINE SCRIPT UNTUK AJAX   -->
+<!-- ============================= -->
+<script>
+const PRODUCT_API_ENDPOINT = "{% url 'main:show_json' %}";
+const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+const loadingSpinner = document.getElementById('loading');
+const errorMessage = document.getElementById('error');
+const emptyStateDisplay = document.getElementById('empty');
+const productGridContainer = document.getElementById('grid');
+const showAllButton = document.getElementById('filter-all');
+const showMyButton = document.getElementById('filter-my');
+
+let activeFilter = 'all';
+let allProductsData = [];
+
+function updateFilterButtons() {
+  if (activeFilter === 'all') {
+    showAllButton.className =
+      'bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition hover:bg-blue-700';
+    showMyButton.className =
+      'bg-white/10 text-gray-300 border border-white/20 px-4 py-2 rounded-md font-medium transition hover:bg-blue-600 hover:text-white';
+  } else {
+    showMyButton.className =
+      'bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition hover:bg-blue-700';
+    showAllButton.className =
+      'bg-white/10 text-gray-300 border border-white/20 px-4 py-2 rounded-md font-medium transition hover:bg-blue-600 hover:text-white';
+  }
+}
+
+function displaySection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+  loadingSpinner.classList.toggle('hidden', !showLoading);
+  errorMessage.classList.toggle('hidden', !showError);
+  emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+  productGridContainer.classList.toggle('hidden', !showGrid);
+  if (showGrid) {
+    productGridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8';
+  }
+}
+
+function sanitize(text) {
+  return DOMPurify.sanitize(text);
+}
+
+/* Build Kartu Produk */
+function buildProductCard(product) {
+  const card = document.createElement('div');
+  card.className =
+    'bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full';
+
+  const isLowStock = product.stock <= 5;
+  const isOwner = Number(product.user_id) === Number(CURRENT_USER_ID);
+  const price = product.price.toLocaleString('id-ID', {
+    style: 'currency',
+    currency: 'IDR'
+  });
+
+  card.innerHTML = `
+    <div class="aspect-[4/3] bg-gradient-to-br from-gray-800/50 to-black/70 flex items-center justify-center">
+      ${
+        product.thumbnail
+          ? `<img src="${product.thumbnail}" alt="${product.name}" class="object-cover w-full h-full">`
+          : `<span class="text-gray-500 text-sm italic">No Image</span>`
+      }
+    </div>
+    <div class="p-5 flex flex-col flex-1 justify-between">
+      <div>
+        <h3 class="text-lg font-semibold text-white mb-2">${product.name}</h3>
+        <p class="text-gray-300 text-sm mb-4 line-clamp-2">${
+          product.description || 'Tidak ada deskripsi.'
+        }</p>
+      </div>
+      <div class="flex justify-between items-center mt-4 text-sm">
+        <span class="font-semibold text-blue-400">${price}</span>
+        ${
+          isOwner
+            ? `<button onclick="confirmDelete('${product.id}')" class="text-red-400 hover:text-red-500 font-medium">Hapus</button>`
+            : ''
+        }
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+/* Render & Filter Produk */
+function renderAllProducts(products) {
+  productGridContainer.innerHTML = '';
+  products.forEach(product => {
+    const card = buildProductCard(product);
+    productGridContainer.appendChild(card);
+  });
+}
+
+function filterAndDisplayProducts() {
+  updateFilterButtons();
+  const filtered = activeFilter === 'all'
+    ? allProductsData
+    : allProductsData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+
+  if (filtered.length === 0) displaySection({ showEmpty: true });
+  else {
+    renderAllProducts(filtered);
+    displaySection({ showGrid: true });
+  }
+}
+
+/* Fetch Data Produk */
+async function fetchProducts() {
+  try {
+    displaySection({ showLoading: true });
+    const response = await fetch(PRODUCT_API_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('Gagal mengambil data produk.');
+    const data = await response.json();
+    allProductsData = data || [];
+    filterAndDisplayProducts();
+  } catch (error) {
+    console.error('Error:', error);
+    displaySection({ showError: true });
+  }
+}
+
+function handleShowAll() {
+  activeFilter = 'all';
+  filterAndDisplayProducts();
+}
+
+function handleShowMine() {
+  activeFilter = 'my';
+  filterAndDisplayProducts();
+}
+
+/* Refresh otomatis setelah tambah produk */
+document.addEventListener('productAdded', function() {
+  fetchProducts();
+});
+
+/* DELETE PRODUK (AJAX + Konfirmasi) */
+async function confirmDelete(id) {
+  if (!confirm("Yakin ingin menghapus produk ini?")) return;
+
+  const res = await fetch(`/delete-product/${id}/`, { method: "POST" });
+  if (res.ok) {
+    showToast('Produk berhasil dihapus.', 'Sportify Store', 'success');
+    fetchProducts();
+  } else {
+    showToast('Gagal menghapus produk.', 'Sportify Store', 'error');
+  }
+}
+
+/* Inisialisasi halaman */
+function initializeProductPage() {
+  showAllButton.addEventListener('click', handleShowAll);
+  showMyButton.addEventListener('click', handleShowMine);
+  fetchProducts();
+}
+
+initializeProductPage();
+</script>
+{% endblock content %}
+
+
