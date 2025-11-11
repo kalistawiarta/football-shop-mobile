@@ -1,4 +1,9 @@
 # football_shop_mobile
+Nama : Kalista Wiarta
+NPM : 2406351491
+Kelas : PBP F
+
+Tugas 7: Elemen Dasar Flutter
 
 1. Apa itu widget tree pada Flutter dan bagaimana hubungan parent-child (induk-anak) bekerja antar widget?
 
@@ -73,3 +78,73 @@ Misalnya, ketika saya mengubah warna tombol atau teks, tampilan akan langsung di
 
 Sementara itu, hot restart akan memulai ulang seluruh aplikasi dari awal dan menghapus semua state yang ada.
 Biasanya digunakan jika ada perubahan besar seperti menambah variabel global atau mengubah struktur widget utama.
+
+Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements
+
+1. Jelaskan perbedaan antara Navigator.push() dan Navigator.pushReplacement() pada Flutter. Dalam kasus apa sebaiknya masing-masing digunakan pada aplikasi Football Shop kamu?
+
+Navigator.push() digunakan untuk menambahkan halaman baru di atas halaman yang sedang dibuka, sehingga pengguna masih bisa kembali ke halaman sebelumnya dengan tombol “Back”.
+
+Sementara Navigator.pushReplacement() digunakan untuk mengganti halaman saat ini dengan halaman baru, sehingga halaman sebelumnya dihapus dari stack dan tidak bisa dikembalikan.
+
+Dalam aplikasi Football Shop:
+
+Navigator.push() digunakan saat pengguna menekan tombol Tambah Produk pada halaman utama, agar setelah menyimpan produk mereka bisa kembali ke halaman utama.
+
+Navigator.pushReplacement() digunakan pada Drawer untuk berpindah antar halaman utama tanpa menumpuk halaman lama di memori.
+
+2. Bagaimana kamu memanfaatkan hierarchy widget seperti Scaffold, AppBar, dan Drawer untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+
+Saya menggunakan hierarchy widget agar seluruh halaman memiliki struktur dan gaya tampilan yang konsisten:
+
+Scaffold menjadi kerangka utama setiap halaman yang menampung elemen penting seperti AppBar, Drawer, dan body.
+
+AppBar menampilkan judul Football Shop di bagian atas, dengan warna biru khas toko.
+
+Drawer berfungsi sebagai navigasi global antar halaman seperti Home dan Add Product.
+
+Dengan struktur ini, navigasi terasa natural, tampilan rapi, dan setiap halaman memiliki identitas visual yang sama.
+
+3. Dalam konteks desain antarmuka, apa kelebihan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen-elemen form? Berikan contoh penggunaannya dari aplikasi kamu.
+
+Widget-widget ini membantu menjaga tampilan form agar tetap responsif dan nyaman dilihat:
+
+Padding memberi jarak antar elemen supaya tidak terlalu menempel di tepi layar.
+
+SingleChildScrollView memungkinkan seluruh isi form di-scroll saat layar tidak cukup tinggi.
+
+Column (dan kadang ListView) digunakan untuk menyusun elemen-elemen form secara vertikal dengan rapi.
+
+Contohnya, pada halaman Add Product Form, semua input (TextFormField, Dropdown, SwitchListTile) dibungkus dengan SingleChildScrollView dan diberi Padding agar tetap bisa diakses pada layar kecil dan tampak teratur.
+
+4. Bagaimana kamu menyesuaikan warna tema agar aplikasi Football Shop memiliki identitas visual yang konsisten dengan brand toko?
+
+Saya menetapkan warna utama aplikasi menggunakan ColorScheme pada MaterialApp dengan kode warna biru #1976D2, yang digunakan secara konsisten di seluruh aplikasi.
+
+Warna ini diterapkan pada:
+
+AppBar di semua halaman,
+
+DrawerHeader,
+
+tombol utama seperti Save Product, dan
+
+elemen aktif seperti SwitchListTile.
+
+Dengan konsistensi warna ini, aplikasi terlihat profesional dan sesuai dengan identitas visual brand Football Shop yang sporty dan modern.
+
+5. Bagaimana validasi input diimplementasikan agar sesuai dengan ketentuan tugas?
+
+Setiap elemen input pada form memiliki validasi yang menyesuaikan tipe datanya:
+
+Name, Category, dan Brand: wajib diisi, minimal 2–3 karakter, maksimal sesuai batas CharField di Django (100–255).
+
+Price dan Stock: wajib diisi, harus berupa angka positif (tidak boleh negatif atau nol).
+
+Description: wajib diisi, minimal 10 karakter agar informatif.
+
+Thumbnail (URL): opsional, tetapi jika diisi harus dalam format URL valid.
+
+isFeatured dan bestSeller: menggunakan SwitchListTile sebagai input boolean.
+
+Selain itu, tombol Save Product hanya dapat ditekan jika semua validasi terpenuhi, dan hasil input akan ditampilkan kembali pada pop-up (AlertDialog) setelah disimpan.
