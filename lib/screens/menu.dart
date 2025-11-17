@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/left_drawer.dart';
+import '../widgets/product_card.dart';
 import '../screens/add_product_form.dart';
+import '../screens/product_entry_list.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
@@ -9,63 +11,81 @@ class MyHomePage extends StatelessWidget {
   final String name = 'Kalista Wiarta';
   final String className = 'B';
 
-  final List<ItemHomepage> items = [
-  ItemHomepage("See Products", Icons.newspaper, const Color(0xFF1976D2)), // biru
-  ItemHomepage("Add Product", Icons.add, const Color(0xFF43A047)),        // hijau toska
-  ItemHomepage("Logout", Icons.logout, const Color(0xFFE53935)),          // merah coral
-];
-
+  final List<Map<String, dynamic>> homeButtons = [
+    {"text": "See Products", "icon": Icons.newspaper},
+    {"text": "Add Product", "icon": Icons.add},
+    {"text": "Logout", "icon": Icons.logout},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          'Football Shop',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+          "Sportify",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
+
       drawer: const LeftDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // --- Info Cards ---
+            /// =======================
+            /// INFO CARDS
+            /// =======================
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                InfoCard(title: 'NPM', content: npm),
-                InfoCard(title: 'Name', content: name),
-                InfoCard(title: 'Class', content: className),
+                _infoCard("NPM", npm),
+                _infoCard("Name", name),
+                _infoCard("Class", className),
               ],
             ),
-            const SizedBox(height: 20.0),
 
-            // --- Welcome text ---
+            const SizedBox(height: 30),
+
             const Text(
-              'Selamat datang di Football Shop',
+              "Selamat datang di Sportify!",
               style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                fontSize: 18.0,
               ),
             ),
-            const SizedBox(height: 20.0),
 
-            // --- Button Grid ---
+            const SizedBox(height: 30),
+
+            /// =======================
+            /// BUTTON GRID (ProductCard dipakai)
+            /// =======================
             GridView.count(
-              primary: false,
               shrinkWrap: true,
-              padding: const EdgeInsets.all(10),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              padding: const EdgeInsets.all(8),
               crossAxisCount: 3,
-              children: items.map((ItemHomepage item) {
-                return ItemCard(item);
+              children: homeButtons.map((btn) {
+                return ProductCard(
+                  icon: btn["icon"],
+                  text: btn["text"],
+                );
               }).toList(),
             ),
           ],
@@ -73,97 +93,52 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
-}
 
-class InfoCard extends StatelessWidget {
-  final String title;
-  final String content;
-
-  const InfoCard({super.key, required this.title, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  /// Glassmorphism Info Card
+  Widget _infoCard(String title, String value) {
+    return Expanded(
       child: Container(
-        width: MediaQuery.of(context).size.width / 3.8,
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white24),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withOpacity(0.06),
+              Colors.white.withOpacity(0.03),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.35),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
         child: Column(
           children: [
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(content),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ItemHomepage {
-  final String name;
-  final IconData icon;
-  final Color color;
-
-  ItemHomepage(this.name, this.icon, this.color);
-}
-
-class ItemCard extends StatelessWidget {
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: item.color,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text("Kamu telah menekan tombol ${item.name}!"),
-                backgroundColor: item.color,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
-            );
-
-          if (item.name == "Add Product") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AddProductPage()),
-            );
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  item.icon,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ],
             ),
-          ),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       ),
     );

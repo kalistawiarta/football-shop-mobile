@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:football_shop_mobile/screens/menu.dart';
 import 'package:football_shop_mobile/screens/add_product_form.dart';
+import 'package:football_shop_mobile/screens/product_entry_list.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -8,65 +9,77 @@ class LeftDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFF1976D2), 
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Football Shop',
-                  textAlign: TextAlign.center,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF1E293B).withOpacity(0.85),
+              const Color(0xFF0F172A).withOpacity(0.9),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blueAccent.shade700,
+                    Colors.blueAccent.shade400,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Center(
+                child: Text(
+                  "Football Shop",
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: 24,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Tempat belanja produk bola terbaik!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
 
-          // --- Tombol Home ---
-          ListTile(
-            leading: Icon(Icons.home_outlined, color: Colors.black87),
-            title: Text('Home'),
-            onTap: () {
+            _menuTile(context, "Home", Icons.home_outlined, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => MyHomePage()),
+                MaterialPageRoute(builder: (_) => MyHomePage()),
               );
-            },
-          ),
+            }),
 
-          // --- Tombol Add Product ---
-          ListTile(
-            leading: Icon(Icons.add_box_outlined, color: Colors.black87),
-            title: Text('Add Product'),
-            onTap: () {
+            _menuTile(context, "Add Product", Icons.add_box_outlined, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const AddProductPage()),
+                MaterialPageRoute(builder: (_) => const AddProductPage()),
               );
-            },
-          ),
-        ],
+            }),
+
+            _menuTile(context, "Product List", Icons.list_alt, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProductEntryListPage()),
+              );
+            }),
+
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _menuTile(BuildContext context, String title, IconData icon, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: onTap,
     );
   }
 }
